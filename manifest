@@ -1,0 +1,7 @@
+name="percona"
+organization="Joyent"
+brand="Instance"
+version="13.1.0"
+description="A SmartOS 64-bit image pre-configured and optimized as a Percona 5.5.29 64-bit MySQL server with Quickbackup, Handlersocket, and Sphinx Plug-in."
+homepage="http://wiki.joyent.com/jpc2/Joyent+Percona+SmartMachine"
+users="root admin mysql"

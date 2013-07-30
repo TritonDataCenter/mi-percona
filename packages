@@ -1,0 +1,14 @@
+# List packages to add to your image one per line.
+htop
+dtracetools
+percona-client
+percona-server
+percona-xtrabackup
+qpress
+handlersocket
+p5-DBD-percona55
+percona-toolkit
+quickbackup-percona
+innotop
+mytop
+net-snmp
