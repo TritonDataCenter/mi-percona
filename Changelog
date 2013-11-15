@@ -1,3 +1,9 @@
+percona-13.3.0
+* Base image is multiarch-13.3.0 (2013Q3)
+* Percona Server version is 5.5.31
+* Updated SMF manifest name to percona from percona-server)
+FIXME: compule xtrabackup and Percona Toolkit
+
 percona-13.1.0
 * Base image is base64-13.1.0 (2013Q1)
 * Percona packages now in pkgsrc
