@@ -62,13 +62,13 @@ svccfg -s quickbackup-percona setprop quickbackup/password = astring: ${QB_PW}
 svcadm refresh quickbackup-percona
 
 log "shutting down an existing instance of MySQL"
-if [[ "$(svcs -Ho state percona-server)" == "online" ]]; then
-	svcadm disable -t percona-server
+if [[ "$(svcs -Ho state percona)" == "online" ]]; then
+	svcadm disable -t percona
 	sleep 2
 fi
 
 log "starting the new MySQL instance"
-svcadm enable percona-server
+svcadm enable percona
 
 log "waiting for the socket to show up"
 COUNT="0";
@@ -86,7 +86,7 @@ log "(it took ${COUNT} seconds to start properly)"
 
 sleep 1
 
-[[ "$(svcs -Ho state percona-server)" == "online" ]] || \
+[[ "$(svcs -Ho state percona)" == "online" ]] || \
   ( log "ERROR MySQL SMF not reporting as 'online'" && exit 31 )
 
 log "running the access lockdown SQL query"
