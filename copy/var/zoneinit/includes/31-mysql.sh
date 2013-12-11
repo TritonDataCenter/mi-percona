@@ -11,14 +11,14 @@ QB_US=qb-$(zonename | awk -F\- '{ print $5 }');
 
 # Default query to lock down access and clean up
 MYSQL_INIT="DELETE from mysql.user;
+DELETE FROM mysql.proxies_priv WHERE Host='base.joyent.us';
 GRANT ALL on *.* to 'root'@'localhost' identified by '${MYSQL_PW}' with grant option;
 GRANT ALL on *.* to 'root'@'${PRIVATE_IP:-${PUBLIC_IP}}' identified by '${MYSQL_PW}' with grant option;
 GRANT LOCK TABLES,SELECT,RELOAD,SUPER,REPLICATION CLIENT on *.* to '${QB_US}'@'localhost' identified by '${QB_PW}';
 DROP DATABASE test;
 DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
 FLUSH PRIVILEGES;
-install plugin sphinx soname 'ha_sphinx.so';
-install plugin handlersocket soname 'handlersocket.so';"
+install plugin sphinx soname 'ha_sphinx.so';"
 
 # MySQL my.cnf tuning
 MEMCAP=$(kstat -c zone_memory_cap -s physcap -p | cut -f2 | awk '{ printf "%d", $1/1024/1024 }');
@@ -50,10 +50,10 @@ log "tuning MySQL configuration"
 gsed -i \
 	-e "s/bind-address = 127.0.0.1/bind-address = ${PRIVATE_IP:-${PUBLIC_IP}}/" \
 	-e "s/back_log = 64/back_log = ${BACK_LOG}/" \
-	-e "s/table_cache = 512/table_cache = ${TABLE_CACHE}/" \
+	-e "s/table_open_cache = 512/table_open_cache = ${TABLE_CACHE}/" \
 	-e "s/thread_cache_size = 1000/thread_cache_size = ${THREAD_CACHE_SIZE}/" \
 	-e "s/max_connections = 1000/max_connections = ${MAX_CONNECTIONS}/" \
-	-e "s/innodb_buffer_pool_size = 256M/innodb_buffer_pool_size = ${INNODB_BUFFER_POOL_SIZE}/" \
+	-e "s/innodb_buffer_pool_size = 16M/innodb_buffer_pool_size = ${INNODB_BUFFER_POOL_SIZE}/" \
 	/opt/local/etc/my.cnf
 
 log "configuring Quickbackup"
@@ -62,13 +62,13 @@ svccfg -s quickbackup-percona setprop quickbackup/password = astring: ${QB_PW}
 svcadm refresh quickbackup-percona
 
 log "shutting down an existing instance of MySQL"
-if [[ "$(svcs -Ho state percona-server)" == "online" ]]; then
-	svcadm disable -t percona-server
+if [[ "$(svcs -Ho state percona)" == "online" ]]; then
+	svcadm disable -t percona
 	sleep 2
 fi
 
 log "starting the new MySQL instance"
-svcadm enable percona-server
+svcadm enable percona
 
 log "waiting for the socket to show up"
 COUNT="0";
@@ -86,7 +86,7 @@ log "(it took ${COUNT} seconds to start properly)"
 
 sleep 1
 
-[[ "$(svcs -Ho state percona-server)" == "online" ]] || \
+[[ "$(svcs -Ho state percona)" == "online" ]] || \
   ( log "ERROR MySQL SMF not reporting as 'online'" && exit 31 )
 
 log "running the access lockdown SQL query"

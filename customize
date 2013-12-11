@@ -9,8 +9,8 @@ set -o errexit
 
 # Ensure we have updated standard packages
 echo "* Updating standard packages.";
-pkg_delete -v nodejs smtools
-pkg_add -v nodejs smtools
+pkg_delete -v nodejs smtools zoneinit
+pkg_add -v nodejs smtools zoneinit
 npm install smartdc -g
 npm install jsontool -g
 
